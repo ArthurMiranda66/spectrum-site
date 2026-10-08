@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SPECTRUM — Pedais para quem faz barulho</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="extras.css">
+</head>
+<body>
+
+<div class="topbar">
+  <span>Frete grátis acima de R$ 599</span>
+  <span>Até 12x sem juros</span>
+  <span>15% off no Pix</span>
+  <span>1 ano de garantia</span>
+</div>
+
+<div class="app">
+
+<header>
+  <a class="logo" href="#inicio" aria-label="Spectrum — início">
+    <img src="spectrum-logo.jpeg" alt="Spectrum">
+  </a>
+  <nav>
+    <a href="#pedais">Pedais</a>
+    <a href="#colecoes">Coleções</a>
+    <a href="#sobre">A Spectrum</a>
+  </nav>
+  <button class="cart" onclick="showCart()">Carrinho <b id="count">0</b></button>
+</header>
+
+<main>
+
+<section class="hero" id="inicio">
+  <div>
+    <div class="eyebrow">EQUIPAMENTOS • SOM • ATITUDE</div>
+    <h1>SEU SOM.<br><em>SUA FREQUÊNCIA.</em></h1>
+    <p>Pedais de guitarra feitos para quem não quer soar igual a todo mundo. Do clean cristalino ao caos absoluto.</p>
+    <div class="actions">
+      <a class="btn primary" href="#pedais">Explorar pedais</a>
+      <a class="btn ghost" href="#colecoes">Ver coleções</a>
+    </div>
+  </div>
+  <div class="visual">
+    <div class="pedal">
+      <div class="brand">SPECTRUM</div>
+      <div class="screen">DIST//01</div>
+      <div class="knobs"><i class="knob"></i><i class="knob"></i><i class="knob"></i></div>
+      <div class="footswitch"></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="pedais">
+  <div class="section-head">
+    <h2>Pedais em destaque</h2>
+    <span>SELEÇÃO SPECTRUM / 2026</span>
+  </div>
+
+  <div class="filters">
+    <button class="filter active">Todos</button>
+    <button class="filter">Drive</button>
+    <button class="filter">Fuzz</button>
+    <button class="filter">Delay</button>
+    <button class="filter">Modulação</button>
+  </div>
+
+  <div class="toolbar">
+    <input id="search" class="field" type="search" placeholder="Buscar pedal...">
+    <select id="price" class="field">
+      <option value="0-Infinity">Todos os preços</option>
+      <option value="0-399.99">Até R$ 399,99</option>
+      <option value="400-499.99">R$ 400 a R$ 499,99</option>
+      <option value="500-699.99">R$ 500 a R$ 699,99</option>
+      <option value="700-Infinity">Acima de R$ 700</option>
+    </select>
+    <select id="sort" class="field">
+      <option value="relevance">Relevância</option>
+      <option value="name">Ordem alfabética</option>
+      <option value="low">Menor preço</option>
+      <option value="high">Maior preço</option>
+      <option value="discount">Maior desconto</option>
+    </select>
+    <label class="check"><input id="stock" type="checkbox"> Só disponíveis</label>
+    <span id="result-count" class="result-count"></span>
+  </div>
+
+  <div class="grid" id="products"></div>
+</section>
+
+<section class="band" id="colecoes">
+  <div>
+    <h2>Monte sua cadeia.</h2>
+    <p>Escolha seu pedal, conecte, aumente o volume e encontre sua assinatura.</p>
+  </div>
+  <button class="btn primary" onclick="scrollToProducts()">Montar meu board</button>
+</section>
+
+</main>
+
+<footer class="footer" id="sobre">
+  <span>SPECTRUM — FEITO PARA QUEM FAZ BARULHO.</span>
+  <span>© 2026 Spectrum Audio <button class="admin-link" id="open-admin">Área administrativa</button></span>
+</footer>
+
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head"><strong>Meu carrinho</strong><button id="close-cart" class="icon-btn">✕</button></div>
+  <div class="drawer-body" id="cart-items"></div>
+  <div class="drawer-foot" id="cart-foot"></div>
+</aside>
+
+<div class="admin-overlay" id="admin-overlay" aria-hidden="true" inert>
+  <section class="admin-panel" role="dialog" aria-modal="true" aria-labelledby="admin-title">
+    <div class="admin-head">
+      <div>
+        <span class="admin-kicker">SPECTRUM / CONTROLE</span>
+        <h2 id="admin-title">Área administrativa</h2>
+      </div>
+      <button class="icon-btn" id="close-admin" aria-label="Fechar painel">✕</button>
+    </div>
+    <div class="admin-auth" id="admin-auth"></div>
+    <div class="admin-content" id="admin-content" hidden>
+      <p class="admin-notice">As alterações ficam salvas somente neste navegador. A senha é uma barreira local, não uma proteção real contra quem tem acesso ao arquivo ou às ferramentas do navegador. Estoque não informado não limita as unidades no carrinho; estoque zero deixa o pedal indisponível.</p>
+      <div id="admin-products" class="admin-products"></div>
+      <button class="admin-logout" id="admin-logout" type="button">Sair da área administrativa</button>
+    </div>
+  </section>
+</div>
+
+<script>
+/* =========================================
+   PRODUTOS
+   old = preço "de" (opcional) | stock = disponibilidade | quantity = estoque opcional
+========================================= */
+const products = [
+  { id: 1,  name: "DIST//01",  type: "DRIVE",     desc: "Overdrive quente para riffs que cortam a mix.",      old: 629.90, price: 489.90, tone: "",      stock: true,  quantity: null },
+  { id: 2,  name: "BOOST//04", type: "DRIVE",     desc: "Boost limpo para empurrar o ampli sem colorir.",     old: 0,      price: 349.90, tone: "",      stock: true,  quantity: null },
+  { id: 3,  name: "CRUNCH//05",type: "DRIVE",     desc: "Distorção britânica com ataque e mordida.",          old: 799.90, price: 599.90, tone: "red",   stock: true,  quantity: null },
+  { id: 4,  name: "FUZZ//99",  type: "FUZZ",      desc: "Fuzz pesado, sujo e cheio de personalidade.",        old: 0,      price: 529.90, tone: "red",   stock: true,  quantity: null },
+  { id: 5,  name: "FUZZ//12",  type: "FUZZ",      desc: "Fuzz octavado para solos rasgados e imprevisíveis.", old: 899.90, price: 649.90, tone: "red",   stock: false, quantity: null },
+  { id: 6,  name: "VOID//02",  type: "DELAY",     desc: "Eco espacial com repetição precisa e musical.",      old: 0,      price: 579.90, tone: "blue",  stock: true,  quantity: null },
+  { id: 7,  name: "ECHO//06",  type: "DELAY",     desc: "Delay analógico com repetições quentes e escuras.",  old: 699.90, price: 519.90, tone: "blue",  stock: true,  quantity: null },
+  { id: 8,  name: "REVERB//09",type: "DELAY",     desc: "Shimmer reverb para atmosferas enormes.",            old: 1199.90,price: 899.90, tone: "blue",  stock: true,  quantity: null },
+  { id: 9,  name: "WAVE//03",  type: "MODULAÇÃO", desc: "Chorus analógico para texturas largas e vivas.",     old: 0,      price: 449.90, tone: "green", stock: true,  quantity: null },
+  { id: 10, name: "PHASE//07", type: "MODULAÇÃO", desc: "Phaser clássico de 4 estágios, balanço setentista.", old: 559.90, price: 429.90, tone: "green", stock: true,  quantity: null },
+  { id: 11, name: "TREM//08",  type: "MODULAÇÃO", desc: "Tremolo com onda quadrada e senoidal.",              old: 0,      price: 389.90, tone: "green", stock: false, quantity: null },
+  { id: 12, name: "ROTARY//10",type: "MODULAÇÃO", desc: "Simulador de Leslie com velocidade ajustável.",      old: 1099.90,price: 799.90, tone: "green", stock: true,  quantity: null }
+];
+
+const PIX_OFF = 0.15;
+const INSTALLMENTS = 12;
+const INVENTORY_KEY = "spectrum-inventory-v1";
+const CART_KEY = "spectrum-cart-v1";
+const ADMIN_CREDENTIALS_KEY = "spectrum-admin-credentials-v1";
+const ADMIN_SESSION_KEY = "spectrum-admin-session-v1";
+const PASSWORD_ITERATIONS = 180000;
+
+/* =========================================
+   ESTADO
+========================================= */
+const state = { filter: "TODOS", search: "", sort: "relevance", price: "0-Infinity", onlyStock: false };
+const cart = {}; // id -> quantidade
+
+/* =========================================
+   ELEMENTOS
+========================================= */
+const $ = (s) => document.querySelector(s);
+const grid = $("#products");
+const cartCount = $("#count");
+const filters = document.querySelectorAll(".filter");
+const drawer = $("#drawer");
+const overlay = $("#overlay");
+const adminOverlay = $("#admin-overlay");
+const adminAuth = $("#admin-auth");
+const adminContent = $("#admin-content");
+const adminProducts = $("#admin-products");
+
+/* =========================================
+   UTILITÁRIOS
+========================================= */
+const brl = (v) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+function normalize(text) {
+  return text.trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+}
+
+const discount = (p) => (p.old > p.price ? Math.round((1 - p.price / p.old) * 100) : 0);
+
+function escapeHTML(text) {
+  return String(text).replace(/[&<>"']/g, (character) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[character]);
+}
+
+function isAvailable(product) {
+  return product.stock && (product.quantity === null || product.quantity > 0);
+}
+
+function loadInventory() {
+  const stored = localStorage.getItem(INVENTORY_KEY);
+  if (!stored) return;
+
+  const savedProducts = JSON.parse(stored);
+  if (!Array.isArray(savedProducts)) throw new Error("Os dados de estoque salvos estão inválidos.");
+
+  savedProducts.forEach((saved) => {
+    const product = products.find((item) => item.id === saved.id);
+    if (!product || typeof saved.desc !== "string" || typeof saved.stock !== "boolean") return;
+    if (saved.quantity != null && (!Number.isSafeInteger(saved.quantity) || saved.quantity < 0)) return;
+    product.desc = saved.desc;
+    product.stock = saved.stock;
+    product.quantity = saved.quantity ?? null;
+  });
+}
+
+function loadCart() {
+  const stored = localStorage.getItem(CART_KEY);
+  if (!stored) return;
+
+  const savedCart = JSON.parse(stored);
+  if (!savedCart || typeof savedCart !== "object" || Array.isArray(savedCart)) {
+    throw new Error("Os dados salvos do carrinho estão inválidos.");
+  }
+
+  Object.entries(savedCart).forEach(([id, quantity]) => {
+    const product = products.find((item) => item.id === Number(id));
+    if (!product || !Number.isSafeInteger(quantity) || quantity <= 0 || !isAvailable(product)) return;
+    cart[product.id] = product.quantity === null
+      ? quantity
+      : Math.min(quantity, product.quantity);
+  });
+}
+
+function saveCart() {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  } catch (error) {
+    alert(`Não foi possível salvar o carrinho neste navegador. ${error.message}`);
+  }
+}
+
+function saveInventory() {
+  try {
+    localStorage.setItem(INVENTORY_KEY, JSON.stringify(products.map(({ id, desc, stock, quantity }) => ({
+      id, desc, stock, quantity
+    }))));
+    return true;
+  } catch (error) {
+    alert(`Não foi possível salvar o estoque neste navegador. ${error.message}`);
+    return false;
+  }
+}
+
+function getAdminCredentials() {
+  const stored = localStorage.getItem(ADMIN_CREDENTIALS_KEY);
+  if (!stored) return null;
+  const credentials = JSON.parse(stored);
+  if (typeof credentials.salt !== "string" || typeof credentials.hash !== "string") {
+    throw new Error("As credenciais administrativas salvas estão inválidas.");
+  }
+  return credentials;
+}
+
+function decodeBase64(value) {
+  return Uint8Array.from(atob(value), (character) => character.charCodeAt(0));
+}
+
+function encodeBase64(bytes) {
+  return btoa(String.fromCharCode(...bytes));
+}
+
+async function derivePasswordHash(password, salt) {
+  if (!window.crypto || !crypto.subtle) {
+    throw new Error("A proteção por senha requer um navegador com Web Crypto. Abra o site em localhost ou em HTTPS.");
+  }
+  const key = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+  const bits = await crypto.subtle.deriveBits(
+    { name: "PBKDF2", salt, iterations: PASSWORD_ITERATIONS, hash: "SHA-256" },
+    key,
+    256
+  );
+  return new Uint8Array(bits);
+}
+
+async function setAdminPassword(password) {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const hash = await derivePasswordHash(password, salt);
+  localStorage.setItem(ADMIN_CREDENTIALS_KEY, JSON.stringify({
+    salt: encodeBase64(salt),
+    hash: encodeBase64(hash)
+  }));
+}
+
+function showAdminMessage(message) {
+  const element = $("#admin-message");
+  if (element) element.textContent = message;
+}
+
+function renderAdminAuth() {
+  const setupRequired = !localStorage.getItem(ADMIN_CREDENTIALS_KEY);
+  adminAuth.innerHTML = `
+    <form id="admin-auth-form" class="admin-auth-form">
+      <p>${setupRequired
+        ? "Crie uma senha para abrir o painel neste navegador."
+        : "Digite sua senha para continuar."}</p>
+      ${setupRequired ? `
+        <label>Nova senha <input name="password" type="password" minlength="10" autocomplete="new-password" required></label>
+        <label>Confirme a senha <input name="confirm-password" type="password" minlength="10" autocomplete="new-password" required></label>
+        <small>Use pelo menos 10 caracteres. A senha não pode ser recuperada.</small>
+      ` : `<label>Senha <input name="password" type="password" autocomplete="current-password" required></label>`}
+      <p id="admin-message" class="admin-message" role="status"></p>
+      <button class="admin-submit" type="submit">${setupRequired ? "Criar senha e entrar" : "Entrar"}</button>
+    </form>`;
+}
+
+function renderAdminProducts() {
+  adminProducts.innerHTML = products.map((product) => `
+    <form class="admin-product" data-admin-product="${product.id}">
+      <div class="admin-product-title">
+        <h3>${escapeHTML(product.name)}</h3>
+        <span>${escapeHTML(product.type)}</span>
+      </div>
+      <label class="admin-description">Descrição
+        <textarea name="desc" maxlength="240" required>${escapeHTML(product.desc)}</textarea>
+      </label>
+      <div class="admin-product-controls">
+        <label class="admin-availability">
+          <input name="stock" type="checkbox" ${product.stock ? "checked" : ""}>
+          Marcado como disponível
+        </label>
+        <label class="admin-quantity">Quantidade em estoque
+          <input name="quantity" type="number" min="0" step="1" placeholder="Não informada" value="${product.quantity ?? ""}">
+        </label>
+      </div>
+      <button class="admin-save" type="submit">Salvar ${escapeHTML(product.name)}</button>
+      <p class="admin-save-message" role="status"></p>
+    </form>`).join("");
+}
+
+function openAdmin() {
+  adminOverlay.classList.add("open");
+  adminOverlay.inert = false;
+  adminOverlay.setAttribute("aria-hidden", "false");
+  try {
+    const authenticated = sessionStorage.getItem(ADMIN_SESSION_KEY) === "authenticated";
+    adminContent.hidden = !authenticated;
+    adminAuth.hidden = authenticated;
+    if (authenticated) {
+      renderAdminProducts();
+    } else {
+      renderAdminAuth();
+      $("#admin-auth-form [name=password]").focus();
+    }
+  } catch (error) {
+    alert(`Não foi possível abrir o painel administrativo. ${error.message}`);
+    closeAdmin();
+  }
+}
+
+function closeAdmin() {
+  adminOverlay.classList.remove("open");
+  adminOverlay.inert = true;
+  adminOverlay.setAttribute("aria-hidden", "true");
+}
+
+/* =========================================
+   FILTRAR + ORDENAR
+========================================= */
+function getVisible() {
+  const [min, max] = state.price.split("-").map(Number);
+  const q = normalize(state.search);
+
+  const list = products.filter((p) =>
+    (state.filter === "TODOS" || normalize(p.type) === state.filter) &&
+    p.price >= min && p.price <= max &&
+    (!state.onlyStock || isAvailable(p)) &&
+    (!q || normalize(p.name + " " + p.type + " " + p.desc).includes(q))
+  );
+
+  const sorts = {
+    name: (a, b) => a.name.localeCompare(b.name),
+    low: (a, b) => a.price - b.price,
+    high: (a, b) => b.price - a.price,
+    discount: (a, b) => discount(b) - discount(a)
+  };
+  if (sorts[state.sort]) list.sort(sorts[state.sort]);
+  return list;
+}
+
+/* =========================================
+   MOSTRAR PRODUTOS
+========================================= */
+function render() {
+  const list = getVisible();
+  $("#result-count").textContent = `${list.length} produto(s)`;
+
+  if (!list.length) {
+    grid.innerHTML = '<p class="empty">Nenhum pedal encontrado com esses filtros.</p>';
+    return;
+  }
+
+  grid.innerHTML = list.map((p) => {
+    const off = discount(p);
+    const available = isAvailable(p);
+    const badge = !available ? '<span class="badge off">Indisponível</span>'
+                : off ? `<span class="badge">${off}% OFF</span>` : "";
+    const action = available
+      ? `<button class="add" data-add="${p.id}">Adicionar</button>`
+      : `<button class="add notify" data-notify="${p.id}">Avise-me</button>`;
+
+    return `
+      <article class="card ${available ? "" : "unavailable"}">
+        ${badge}
+        <div class="product-img">
+          <div class="mini-pedal ${p.tone}">
+            <strong>SPECTRUM</strong>
+            <div class="dot"></div>
+            <small>${p.name}</small>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="tag">${p.type}</div>
+          <h3>${p.name}</h3>
+          <div class="desc">${escapeHTML(p.desc)}</div>
+          <div class="prices">
+            ${p.old ? `<span class="old">${brl(p.old)}</span>` : ""}
+            <span class="now">${brl(p.price)}</span>
+            <span class="inst">até ${INSTALLMENTS}x de ${brl(p.price / INSTALLMENTS)} sem juros</span>
+            <span class="pix">${brl(p.price * (1 - PIX_OFF))} via Pix</span>
+          </div>
+          ${action}
+        </div>
+      </article>`;
+  }).join("");
+}
+
+/* =========================================
+   CARRINHO
+========================================= */
+function addCart(id) {
+  const product = products.find((item) => item.id === id);
+  if (!product || !isAvailable(product)) return;
+  if (product.quantity !== null && (cart[id] || 0) >= product.quantity) {
+    alert(`Não há mais unidades de ${product.name} disponíveis.`);
+    return;
+  }
+  cart[id] = (cart[id] || 0) + 1;
+  updateCart();
+}
+
+function changeQty(id, delta) {
+  const product = products.find((item) => item.id === id);
+  if (!product) return;
+  if (delta > 0 && (!isAvailable(product) ||
+    (product.quantity !== null && (cart[id] || 0) >= product.quantity))) {
+    alert(`Não há mais unidades de ${product.name} disponíveis.`);
+    return;
+  }
+  cart[id] = (cart[id] || 0) + delta;
+  if (cart[id] <= 0) delete cart[id];
+  updateCart();
+}
+
+function updateCart() {
+  saveCart();
+  const entries = Object.entries(cart).map(([id, qty]) => ({ p: products.find((x) => x.id === +id), qty }));
+  const totalQty = entries.reduce((s, e) => s + e.qty, 0);
+  const total = entries.reduce((s, e) => s + e.p.price * e.qty, 0);
+
+  cartCount.textContent = totalQty;
+
+  $("#cart-items").innerHTML = entries.length
+    ? entries.map(({ p, qty }) => `
+        <div class="ci">
+          <div>
+            <strong>${p.name}</strong><br><small>${p.type}</small>
+            <div class="qty">
+              <button data-qty="${p.id}" data-d="-1">−</button>${qty}
+              <button data-qty="${p.id}" data-d="1">+</button>
+            </div>
+          </div>
+          <div style="text-align:right">
+            <strong>${brl(p.price * qty)}</strong><br>
+            <button class="rm" data-qty="${p.id}" data-d="${-qty}">remover</button>
+          </div>
+        </div>`).join("")
+    : '<p class="empty">Carrinho vazio.</p>';
+
+  $("#cart-foot").innerHTML = entries.length
+    ? `<div class="total"><span>Total</span><span>${brl(total)}</span></div>
+       <div class="pixtotal">${brl(total * (1 - PIX_OFF))} via Pix</div>
+       <button class="checkout" onclick="alert('Compra simulada. Obrigado!')">Finalizar compra</button>`
+    : "";
+}
+
+function openCart(open = true) {
+  drawer.classList.toggle("open", open);
+  overlay.classList.toggle("open", open);
+  drawer.setAttribute("aria-hidden", String(!open));
+}
+
+function showCart() { openCart(true); }
+
+/* =========================================
+   EVENTOS
+========================================= */
+filters.forEach((button) => {
+  button.addEventListener("click", () => {
+    filters.forEach((i) => i.classList.remove("active"));
+    button.classList.add("active");
+    state.filter = normalize(button.textContent);
+    render();
+  });
+});
+
+$("#search").addEventListener("input", (e) => { state.search = e.target.value; render(); });
+$("#price").addEventListener("change", (e) => { state.price = e.target.value; render(); });
+$("#sort").addEventListener("change", (e) => { state.sort = e.target.value; render(); });
+$("#stock").addEventListener("change", (e) => { state.onlyStock = e.target.checked; render(); });
+
+grid.addEventListener("click", (e) => {
+  const add = e.target.closest("[data-add]");
+  if (add) { addCart(+add.dataset.add); return; }
+  const notify = e.target.closest("[data-notify]");
+  if (notify) { notify.textContent = "Aviso ativado ✓"; notify.disabled = true; }
+});
+
+$("#open-admin").addEventListener("click", openAdmin);
+$("#close-admin").addEventListener("click", closeAdmin);
+adminOverlay.addEventListener("click", (e) => {
+  if (e.target === adminOverlay) closeAdmin();
+});
+
+adminAuth.addEventListener("submit", async (e) => {
+  if (e.target.id !== "admin-auth-form") return;
+  e.preventDefault();
+  const form = e.target;
+  const password = form.elements.password.value;
+  const confirmation = form.elements["confirm-password"];
+  const submit = form.querySelector("[type=submit]");
+  submit.disabled = true;
+
+  try {
+    const credentials = getAdminCredentials();
+    if (!credentials) {
+      if (password.length < 10) throw new Error("A senha precisa ter pelo menos 10 caracteres.");
+      if (password !== confirmation.value) throw new Error("As senhas não coincidem.");
+      await setAdminPassword(password);
+    } else {
+      const hash = await derivePasswordHash(password, decodeBase64(credentials.salt));
+      const expected = decodeBase64(credentials.hash);
+      const matches = hash.length === expected.length && hash.every((byte, index) => byte === expected[index]);
+      if (!matches) throw new Error("Senha incorreta.");
+    }
+
+    sessionStorage.setItem(ADMIN_SESSION_KEY, "authenticated");
+    adminAuth.hidden = true;
+    adminContent.hidden = false;
+    renderAdminProducts();
+  } catch (error) {
+    showAdminMessage(error.message);
+    submit.disabled = false;
+  }
+});
+
+adminProducts.addEventListener("submit", (e) => {
+  const form = e.target.closest("[data-admin-product]");
+  if (!form) return;
+  e.preventDefault();
+
+  const product = products.find((item) => item.id === Number(form.dataset.adminProduct));
+  const description = form.elements.desc.value.trim();
+  const quantityText = form.elements.quantity.value;
+  const quantity = quantityText === "" ? null : Number(quantityText);
+  const message = form.querySelector(".admin-save-message");
+  if (!product || !description || (quantity !== null && (!Number.isSafeInteger(quantity) || quantity < 0))) {
+    message.textContent = "Confira a descrição e a quantidade informada.";
+    return;
+  }
+
+  const previous = { desc: product.desc, stock: product.stock, quantity: product.quantity };
+  product.desc = description;
+  product.stock = form.elements.stock.checked;
+  product.quantity = quantity;
+  if (!saveInventory()) {
+    Object.assign(product, previous);
+    return;
+  }
+
+  if (!isAvailable(product)) {
+    delete cart[product.id];
+  } else if (product.quantity !== null && cart[product.id] > product.quantity) {
+    cart[product.id] = product.quantity;
+  }
+  render();
+  updateCart();
+  renderAdminProducts();
+  const updatedForm = adminProducts.querySelector(`[data-admin-product="${product.id}"]`);
+  updatedForm.querySelector(".admin-save-message").textContent = "Alterações salvas neste navegador.";
+});
+
+$("#admin-logout").addEventListener("click", () => {
+  sessionStorage.removeItem(ADMIN_SESSION_KEY);
+  adminContent.hidden = true;
+  adminAuth.hidden = false;
+  renderAdminAuth();
+});
+
+$("#cart-items").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-qty]");
+  if (b) changeQty(+b.dataset.qty, +b.dataset.d);
+});
+
+$("#close-cart").addEventListener("click", () => openCart(false));
+overlay.addEventListener("click", () => openCart(false));
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    openCart(false);
+    closeAdmin();
+  }
+});
+
+function scrollToProducts() {
+  $("#pedais").scrollIntoView({ behavior: "smooth" });
+}
+
+/* =========================================
+   INICIALIZAÇÃO
+========================================= */
+try {
+  loadInventory();
+} catch (error) {
+  alert(`Não foi possível carregar o estoque salvo. ${error.message}`);
+}
+try {
+  loadCart();
+} catch (error) {
+  alert(`Não foi possível carregar o carrinho salvo. ${error.message}`);
+}
+render();
+updateCart();
+
+</script>
+</body>
+</html>
